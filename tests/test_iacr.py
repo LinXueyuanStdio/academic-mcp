@@ -1,7 +1,7 @@
 import unittest
 import os
 import requests
-from paper_search_mcp.academic_platforms.iacr import IACRSearcher
+from academic_mcp.sources.iacr import IACRSearcher
 
 
 def check_iacr_accessible():

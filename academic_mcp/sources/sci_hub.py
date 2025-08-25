@@ -1,15 +1,20 @@
-"""Sci-Hub downloader integration.
-
-Simple wrapper adapted from scihub.py for downloading PDFs via Sci-Hub.
-"""
 from pathlib import Path
 import re
 import hashlib
-import logging
-from typing import Optional
-
-import requests
+from typing import List, Dict, Any, Optional
+from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
+import requests
+import os
+import time
+import random
+
+import feedparser
+from PyPDF2 import PdfReader
+from loguru import logger
+
+from ..types import Paper, PaperSource
+
 
 
 class SciHubFetcher:
@@ -47,31 +52,31 @@ class SciHubFetcher:
             # Get direct URL to PDF
             pdf_url = self._get_direct_url(identifier)
             if not pdf_url:
-                logging.error(f"Could not find PDF URL for identifier: {identifier}")
+                logger.error(f"Could not find PDF URL for identifier: {identifier}")
                 return None
 
             # Download the PDF
             response = self.session.get(pdf_url, verify=False, timeout=30)
-            
+
             if response.status_code != 200:
-                logging.error(f"Failed to download PDF, status {response.status_code}")
+                logger.error(f"Failed to download PDF, status {response.status_code}")
                 return None
 
             if response.headers.get('Content-Type') != 'application/pdf':
-                logging.error("Response is not a PDF")
+                logger.error("Response is not a PDF")
                 return None
 
             # Generate filename and save
             filename = self._generate_filename(response, identifier)
             file_path = self.output_dir / filename
-            
+
             with open(file_path, 'wb') as f:
                 f.write(response.content)
-                
+
             return str(file_path)
 
         except Exception as e:
-            logging.error(f"Error downloading PDF for {identifier}: {e}")
+            logger.error(f"Error downloading PDF for {identifier}: {e}")
             return None
 
     def _get_direct_url(self, identifier: str) -> Optional[str]:
@@ -84,34 +89,34 @@ class SciHubFetcher:
             # Search on Sci-Hub
             search_url = f"{self.base_url}/{identifier}"
             response = self.session.get(search_url, verify=False, timeout=20)
-            
+
             if response.status_code != 200:
                 return None
 
             soup = BeautifulSoup(response.content, 'html.parser')
-            
+
             # Check for article not found
             if "article not found" in response.text.lower():
-                logging.warning("Article not found on Sci-Hub")
+                logger.warning("Article not found on Sci-Hub")
                 return None
 
             # Look for embed tag with PDF (most common in modern Sci-Hub)
             embed = soup.find('embed', {'type': 'application/pdf'})
-            logging.debug(f"Found embed tag: {embed}")
+            logger.debug(f"Found embed tag: {embed}")
             if embed:
                 src = embed.get('src') if hasattr(embed, 'get') else None
-                logging.debug(f"Embed src: {src}")
+                logger.debug(f"Embed src: {src}")
                 if src and isinstance(src, str):
                     if src.startswith('//'):
                         pdf_url = 'https:' + src
-                        logging.debug(f"Returning PDF URL: {pdf_url}")
+                        logger.debug(f"Returning PDF URL: {pdf_url}")
                         return pdf_url
                     elif src.startswith('/'):
                         pdf_url = self.base_url + src
-                        logging.debug(f"Returning PDF URL: {pdf_url}")
+                        logger.debug(f"Returning PDF URL: {pdf_url}")
                         return pdf_url
                     else:
-                        logging.debug(f"Returning PDF URL: {src}")
+                        logger.debug(f"Returning PDF URL: {src}")
                         return src
 
             # Look for iframe with PDF (fallback)
@@ -155,7 +160,7 @@ class SciHubFetcher:
             return None
 
         except Exception as e:
-            logging.error(f"Error getting direct URL for {identifier}: {e}")
+            logger.error(f"Error getting direct URL for {identifier}: {e}")
             return None
 
     def _generate_filename(self, response: requests.Response, identifier: str) -> str:

@@ -9,5 +9,5 @@ startCommand:
   commandFunction:
     # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
     |-
-    (config) => ({ command: 'python', args: ['-m', 'paper_search_mcp.server'] })
+    (config) => ({ command: 'python', args: ['-m', 'academic_mcp.server'] })
   exampleConfig: {}

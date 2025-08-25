@@ -1,22 +1,15 @@
-# paper_search_mcp/sources/arxiv.py
-from typing import List
-from datetime import datetime
+from typing import List, Dict, Any, Optional
+from datetime import datetime, timedelta
 import requests
-import feedparser
-from ..paper import Paper
-from PyPDF2 import PdfReader
 import os
+import time
 
-class PaperSource:
-    """Abstract base class for paper sources"""
-    def search(self, query: str, **kwargs) -> List[Paper]:
-        raise NotImplementedError
+import feedparser
+from PyPDF2 import PdfReader
+from loguru import logger
 
-    def download_pdf(self, paper_id: str, save_path: str) -> str:
-        raise NotImplementedError
+from ..types import Paper, PaperSource
 
-    def read_paper(self, paper_id: str, save_path: str) -> str:
-        raise NotImplementedError
 
 class ArxivSearcher(PaperSource):
     """Searcher for arXiv papers"""
@@ -66,11 +59,11 @@ class ArxivSearcher(PaperSource):
 
     def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
         """Read a paper and convert it to text format.
-        
+
         Args:
             paper_id: arXiv paper ID
             save_path: Directory where the PDF is/will be saved
-            
+
         Returns:
             str: The extracted text content of the paper
         """
@@ -78,16 +71,16 @@ class ArxivSearcher(PaperSource):
         pdf_path = f"{save_path}/{paper_id}.pdf"
         if not os.path.exists(pdf_path):
             pdf_path = self.download_pdf(paper_id, save_path)
-        
+
         # Read the PDF
         try:
             reader = PdfReader(pdf_path)
             text = ""
-            
+
             # Extract text from each page
             for page in reader.pages:
                 text += page.extract_text() + "\n"
-            
+
             return text.strip()
         except Exception as e:
             print(f"Error reading PDF for paper {paper_id}: {e}")
@@ -96,7 +89,7 @@ class ArxivSearcher(PaperSource):
 if __name__ == "__main__":
     # 测试 ArxivSearcher 的功能
     searcher = ArxivSearcher()
-    
+
     # 测试搜索功能
     print("Testing search functionality...")
     query = "machine learning"
@@ -108,7 +101,7 @@ if __name__ == "__main__":
             print(f"{i}. {paper.title} (ID: {paper.paper_id})")
     except Exception as e:
         print(f"Error during search: {e}")
-    
+
     # 测试 PDF 下载功能
     if papers:
         print("\nTesting PDF download functionality...")

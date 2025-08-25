@@ -1,7 +1,7 @@
 import unittest
 import os
 import requests
-from paper_search_mcp.academic_platforms.biorxiv import BioRxivSearcher
+from academic_mcp.sources.biorxiv import BioRxivSearcher
 
 def check_api_accessible():
     """检查 bioRxiv API 是否可访问"""
@@ -24,7 +24,7 @@ class TestBioRxivSearcher(unittest.TestCase):
     def test_search(self):
         if not self.api_accessible:
             self.skipTest("bioRxiv API is not accessible")
-        
+
         papers = self.searcher.search("machine learning", max_results=10)
         print(f"Found {len(papers)} papers for query 'machine learning':")
         for i, paper in enumerate(papers, 1):
@@ -35,20 +35,20 @@ class TestBioRxivSearcher(unittest.TestCase):
     def test_download_and_read(self):
         if not self.api_accessible:
             self.skipTest("bioRxiv API is not accessible")
-            
+
         papers = self.searcher.search("machine learning", max_results=1)
         if not papers:
             self.skipTest("No papers found for testing download")
-            
+
         save_path = "./downloads"
         os.makedirs(save_path, exist_ok=True)
         paper = papers[0]
         pdf_path = None
-        
+
         try:
             pdf_path = self.searcher.download_pdf(paper.paper_id, save_path)
             self.assertTrue(os.path.exists(pdf_path))
-            
+
             text_content = self.searcher.read_paper(paper.paper_id, save_path)
             self.assertTrue(len(text_content) > 0)
         finally:

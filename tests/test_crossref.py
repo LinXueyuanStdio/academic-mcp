@@ -2,7 +2,7 @@
 import unittest
 import os
 import requests
-from paper_search_mcp.academic_platforms.crossref import CrossRefSearcher
+from academic_mcp.sources.crossref import CrossRefSearcher
 
 def check_api_accessible():
     """检查 CrossRef API 是否可访问
@@ -26,7 +26,7 @@ class TestCrossRefSearcher(unittest.TestCase):
     def test_search(self):
         if not self.api_accessible:
             self.skipTest("CrossRef API is not accessible")
-        
+
         papers = self.searcher.search("machine learning", max_results=5)
         print(f"Found {len(papers)} papers for query 'machine learning':")
         for i, paper in enumerate(papers, 1):
@@ -46,10 +46,10 @@ class TestCrossRefSearcher(unittest.TestCase):
     def test_search_with_filters(self):
         if not self.api_accessible:
             self.skipTest("CrossRef API is not accessible")
-            
+
         # Test search with date filter
         papers = self.searcher.search(
-            "artificial intelligence", 
+            "artificial intelligence",
             max_results=3,
             filter="from-pub-date:2020,has-full-text:true"
         )
@@ -59,11 +59,11 @@ class TestCrossRefSearcher(unittest.TestCase):
     def test_get_paper_by_doi(self):
         if not self.api_accessible:
             self.skipTest("CrossRef API is not accessible")
-            
+
         # Test with a known DOI
         known_doi = "10.1038/nature12373"  # A Nature paper
         paper = self.searcher.get_paper_by_doi(known_doi)
-        
+
         if paper:  # Paper might not be found
             print(f"Retrieved paper by DOI: {paper.title}")
             self.assertEqual(paper.doi, known_doi)
@@ -74,7 +74,7 @@ class TestCrossRefSearcher(unittest.TestCase):
     def test_get_paper_by_invalid_doi(self):
         if not self.api_accessible:
             self.skipTest("CrossRef API is not accessible")
-            
+
         # Test with an invalid DOI
         invalid_doi = "10.1234/invalid.doi.123456789"
         paper = self.searcher.get_paper_by_doi(invalid_doi)
@@ -83,7 +83,7 @@ class TestCrossRefSearcher(unittest.TestCase):
     def test_download_pdf_not_supported(self):
         with self.assertRaises(NotImplementedError) as context:
             self.searcher.download_pdf("10.1038/nature12373", "./downloads")
-        
+
         self.assertIn("CrossRef does not provide direct PDF downloads", str(context.exception))
 
     def test_read_paper_not_supported(self):

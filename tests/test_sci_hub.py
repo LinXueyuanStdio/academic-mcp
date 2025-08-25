@@ -4,7 +4,7 @@ import tempfile
 import shutil
 import os
 import requests
-from paper_search_mcp.academic_platforms.sci_hub import SciHubFetcher
+from academic_mcp.sources.sci_hub import SciHubFetcher
 
 
 def check_sci_hub_accessible():
@@ -64,19 +64,19 @@ class TestSciHubFetcher(unittest.TestCase):
             "10.1016/j.cell.2013.06.044",  # Cell paper
             "10.1038/35057062",  # Nature paper on human genome
         ]
-        
+
         success_count = 0
-        
+
         for doi in test_dois:
             print(f"\nTesting PDF download for DOI: {doi}")
             result = self.fetcher.download_pdf(doi)
-            
+
             if result:
                 # Download successful
                 self.assertIsInstance(result, str)
                 self.assertTrue(os.path.exists(result))
                 self.assertTrue(result.endswith('.pdf'))
-                
+
                 # Check file size (should be > 0)
                 file_size = os.path.getsize(result)
                 self.assertGreater(file_size, 0)
@@ -85,7 +85,7 @@ class TestSciHubFetcher(unittest.TestCase):
                 break  # Stop after first successful download
             else:
                 print(f"Download failed for {doi} (may be blocked or unavailable)")
-        
+
         if success_count == 0:
             # All downloads failed - likely due to blocking
             print("All downloads failed - this may be expected due to Sci-Hub blocking or CAPTCHA")
@@ -95,10 +95,10 @@ class TestSciHubFetcher(unittest.TestCase):
     def test_download_pdf_invalid_doi(self):
         """Test download with invalid DOI"""
         invalid_doi = "10.1234/invalid.doi.123456789"
-        
+
         print(f"\nTesting download for invalid DOI: {invalid_doi}")
         result = self.fetcher.download_pdf(invalid_doi)
-        
+
         # Should return None for invalid DOI
         self.assertIsNone(result)
 
@@ -109,13 +109,13 @@ class TestSciHubFetcher(unittest.TestCase):
             def __init__(self, url, content):
                 self.url = url
                 self.content = content.encode()
-        
+
         # Test with PDF URL
         response = MockResponse("https://example.com/paper.pdf", "fake pdf content")
         filename = self.fetcher._generate_filename(response, "10.1234/test")
         self.assertTrue(filename.endswith('.pdf'))
         self.assertIn('_', filename)  # Should contain hash separator
-        
+
         # Test with non-PDF URL
         response = MockResponse("https://example.com/page", "fake content")
         filename = self.fetcher._generate_filename(response, "test-paper")
@@ -137,11 +137,11 @@ class TestSciHubFetcher(unittest.TestCase):
             "10.1126/science.1232033",  # Science genome editing
             "10.1073/pnas.1320040111",  # PNAS paper
         ]
-        
+
         for doi in test_dois:
             print(f"\nTesting direct URL extraction for DOI: {doi}")
             result = self.fetcher._get_direct_url(doi)
-            
+
             if result:
                 self.assertIsInstance(result, str)
                 # Should be a URL
@@ -150,7 +150,7 @@ class TestSciHubFetcher(unittest.TestCase):
                 break  # Stop after first success
             else:
                 print(f"No direct URL found for {doi} (may be blocked)")
-        
+
         # Note: This test may not assert success due to Sci-Hub blocking
 
     def test_session_headers(self):
@@ -172,7 +172,7 @@ class TestSciHubFetcher(unittest.TestCase):
         result = self.fetcher.download_pdf("this-is-definitely-not-a-valid-doi-or-identifier-12345")
         # Note: Sci-Hub might still return something, so we just check it doesn't crash
         self.assertIsInstance(result, (str, type(None)))
-        
+
         # Test with empty string
         result = self.fetcher.download_pdf("")
         self.assertIsNone(result)

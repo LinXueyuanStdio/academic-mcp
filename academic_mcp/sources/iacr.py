@@ -1,28 +1,16 @@
-from typing import List, Optional
-from datetime import datetime
-import requests
+from typing import List, Dict, Any, Optional
+from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
+import requests
+import os
 import time
 import random
-from ..paper import Paper
-import logging
+
+import feedparser
 from PyPDF2 import PdfReader
-import os
+from loguru import logger
 
-logger = logging.getLogger(__name__)
-
-
-class PaperSource:
-    """Abstract base class for paper sources"""
-
-    def search(self, query: str, **kwargs) -> List[Paper]:
-        raise NotImplementedError
-
-    def download_pdf(self, paper_id: str, save_path: str) -> str:
-        raise NotImplementedError
-
-    def read_paper(self, paper_id: str, save_path: str) -> str:
-        raise NotImplementedError
+from ..types import Paper, PaperSource
 
 
 class IACRSearcher(PaperSource):

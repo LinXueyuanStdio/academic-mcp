@@ -1,49 +1,41 @@
-# paper_search_mcp/academic_platforms/crossref.py
-from typing import List, Optional, Dict, Any
-from datetime import datetime
+from typing import List, Dict, Any, Optional
+from datetime import datetime, timedelta
 import requests
+import os
 import time
-import random
-from ..paper import Paper
-import logging
 
-logger = logging.getLogger(__name__)
+import feedparser
+from PyPDF2 import PdfReader
+from loguru import logger
+from xlin import save_text
 
-class PaperSource:
-    """Abstract base class for paper sources"""
-    def search(self, query: str, **kwargs) -> List[Paper]:
-        raise NotImplementedError
+from ..types import Paper, PaperSource, paper2text
 
-    def download_pdf(self, paper_id: str, save_path: str) -> str:
-        raise NotImplementedError
-
-    def read_paper(self, paper_id: str, save_path: str) -> str:
-        raise NotImplementedError
 
 class CrossRefSearcher(PaperSource):
     """Searcher for CrossRef database papers"""
-    
+
     BASE_URL = "https://api.crossref.org"
-    
+
     # User agent for polite API usage as per CrossRef etiquette
     USER_AGENT = "paper-search-mcp/0.1.3 (https://github.com/Dragonatorul/paper-search-mcp; mailto:paper-search@example.org)"
-    
+
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': self.USER_AGENT,
             'Accept': 'application/json'
         })
-    
+
     def search(self, query: str, max_results: int = 10, **kwargs) -> List[Paper]:
         """
         Search CrossRef database for papers.
-        
+
         Args:
             query: Search query string
             max_results: Maximum number of results to return (default: 10)
             **kwargs: Additional parameters like filters, sort, etc.
-            
+
         Returns:
             List of Paper objects
         """
@@ -54,7 +46,7 @@ class CrossRefSearcher(PaperSource):
                 'sort': 'relevance',
                 'order': 'desc'
             }
-            
+
             # Add any additional filters from kwargs
             if 'filter' in kwargs:
                 params['filter'] = kwargs['filter']
@@ -62,25 +54,25 @@ class CrossRefSearcher(PaperSource):
                 params['sort'] = kwargs['sort']
             if 'order' in kwargs:
                 params['order'] = kwargs['order']
-                
+
             # Add polite pool parameter
             params['mailto'] = 'paper-search@example.org'
-            
+
             url = f"{self.BASE_URL}/works"
             response = self.session.get(url, params=params, timeout=30)
-            
+
             if response.status_code == 429:
                 # Rate limited - wait and retry once
                 logger.warning("Rate limited by CrossRef API, waiting 2 seconds...")
                 time.sleep(2)
                 response = self.session.get(url, params=params, timeout=30)
-            
+
             response.raise_for_status()
             data = response.json()
-            
+
             papers = []
             items = data.get('message', {}).get('items', [])
-            
+
             for item in items:
                 try:
                     paper = self._parse_crossref_item(item)
@@ -89,16 +81,16 @@ class CrossRefSearcher(PaperSource):
                 except Exception as e:
                     logger.warning(f"Error parsing CrossRef item: {e}")
                     continue
-                    
+
             return papers
-            
+
         except requests.RequestException as e:
             logger.error(f"Error searching CrossRef: {e}")
             return []
         except Exception as e:
             logger.error(f"Unexpected error in CrossRef search: {e}")
             return []
-    
+
     def _parse_crossref_item(self, item: Dict[str, Any]) -> Optional[Paper]:
         """Parse a CrossRef API item into a Paper object."""
         try:
@@ -107,34 +99,34 @@ class CrossRefSearcher(PaperSource):
             title = self._extract_title(item)
             authors = self._extract_authors(item)
             abstract = item.get('abstract', '')
-            
+
             # Extract publication date
             published_date = self._extract_date(item, 'published')
             if not published_date:
                 published_date = self._extract_date(item, 'issued')
             if not published_date:
                 published_date = self._extract_date(item, 'created')
-            
+
             # Default to epoch if no date found
             if not published_date:
                 published_date = datetime(1970, 1, 1)
-            
+
             # Extract URLs
             url = item.get('URL', f"https://doi.org/{doi}" if doi else '')
             pdf_url = self._extract_pdf_url(item)
-            
+
             # Extract additional metadata
             container_title = self._extract_container_title(item)
             publisher = item.get('publisher', '')
             categories = [item.get('type', '')]
-            
+
             # Extract subjects/keywords if available
             subjects = item.get('subject', [])
             if isinstance(subjects, list):
                 keywords = subjects
             else:
                 keywords = []
-            
+
             return Paper(
                 paper_id=doi,
                 title=title,
@@ -161,23 +153,23 @@ class CrossRefSearcher(PaperSource):
                     'prefix': item.get('prefix', '')
                 }
             )
-            
+
         except Exception as e:
             logger.error(f"Error parsing CrossRef item: {e}")
             return None
-    
+
     def _extract_title(self, item: Dict[str, Any]) -> str:
         """Extract title from CrossRef item."""
         titles = item.get('title', [])
         if isinstance(titles, list) and titles:
             return titles[0]
         return str(titles) if titles else ''
-    
+
     def _extract_authors(self, item: Dict[str, Any]) -> List[str]:
         """Extract author names from CrossRef item."""
         authors = []
         author_list = item.get('author', [])
-        
+
         for author in author_list:
             if isinstance(author, dict):
                 given = author.get('given', '')
@@ -188,19 +180,19 @@ class CrossRefSearcher(PaperSource):
                     authors.append(family)
                 elif given:
                     authors.append(given)
-                    
+
         return authors
-    
+
     def _extract_date(self, item: Dict[str, Any], date_field: str) -> Optional[datetime]:
         """Extract date from CrossRef item."""
         date_info = item.get(date_field, {})
         if not date_info:
             return None
-            
+
         date_parts = date_info.get('date-parts', [])
         if not date_parts or not date_parts[0]:
             return None
-            
+
         parts = date_parts[0]
         try:
             year = parts[0] if len(parts) > 0 else 1970
@@ -209,14 +201,14 @@ class CrossRefSearcher(PaperSource):
             return datetime(year, month, day)
         except (ValueError, IndexError):
             return None
-    
+
     def _extract_container_title(self, item: Dict[str, Any]) -> str:
         """Extract container title (journal/book title) from CrossRef item."""
         container_titles = item.get('container-title', [])
         if isinstance(container_titles, list) and container_titles:
             return container_titles[0]
         return str(container_titles) if container_titles else ''
-    
+
     def _extract_pdf_url(self, item: Dict[str, Any]) -> str:
         """Extract PDF URL from CrossRef item."""
         # Check for link in the resource field
@@ -225,7 +217,7 @@ class CrossRefSearcher(PaperSource):
             primary = resource.get('primary', {})
             if primary and primary.get('URL', '').endswith('.pdf'):
                 return primary['URL']
-        
+
         # Check in links array
         links = item.get('link', [])
         for link in links:
@@ -233,17 +225,17 @@ class CrossRefSearcher(PaperSource):
                 content_type = link.get('content-type', '')
                 if 'pdf' in content_type.lower():
                     return link.get('URL', '')
-                    
+
         return ''
-    
+
     def download_pdf(self, paper_id: str, save_path: str) -> str:
         """
         CrossRef doesn't provide direct PDF downloads.
-        
+
         Args:
             paper_id: DOI of the paper
             save_path: Directory to save the PDF
-            
+
         Raises:
             NotImplementedError: Always raises this error as CrossRef doesn't provide direct PDF access
         """
@@ -251,19 +243,23 @@ class CrossRefSearcher(PaperSource):
                   "CrossRef is a citation database that provides metadata about academic papers. "
                   "To access the full text, please use the paper's DOI or URL to visit the publisher's website.")
         raise NotImplementedError(message)
-    
+
     def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
         """
         CrossRef doesn't provide direct paper content access.
-        
+
         Args:
             paper_id: DOI of the paper
             save_path: Directory for potential PDF storage (unused)
-            
+
         Returns:
             str: Error message indicating PDF reading is not supported
         """
-        message = ("CrossRef papers cannot be read directly through this tool. "
+        paper = self.get_paper_by_doi(paper_id)
+        if paper:
+            text = paper2text(paper)
+            return text
+        message = ("Note: CrossRef papers cannot be read directly through this tool. "
                   "CrossRef is a citation database that provides metadata about academic papers. "
                   "Only metadata and abstracts are available through CrossRef's API. "
                   "To access the full text, please use the paper's DOI or URL to visit the publisher's website.")
@@ -272,29 +268,29 @@ class CrossRefSearcher(PaperSource):
     def get_paper_by_doi(self, doi: str) -> Optional[Paper]:
         """
         Get a specific paper by DOI.
-        
+
         Args:
             doi: Digital Object Identifier
-            
+
         Returns:
             Paper object if found, None otherwise
         """
         try:
             url = f"{self.BASE_URL}/works/{doi}"
             params = {'mailto': 'paper-search@example.org'}
-            
+
             response = self.session.get(url, params=params, timeout=30)
-            
+
             if response.status_code == 404:
                 logger.warning(f"DOI not found in CrossRef: {doi}")
                 return None
-                
+
             response.raise_for_status()
             data = response.json()
-            
+
             item = data.get('message', {})
             return self._parse_crossref_item(item)
-            
+
         except requests.RequestException as e:
             logger.error(f"Error fetching DOI {doi} from CrossRef: {e}")
             return None
@@ -306,7 +302,7 @@ if __name__ == "__main__":
     # Test CrossRefSearcher functionality
     # 测试CrossRefSearcher功能
     searcher = CrossRefSearcher()
-    
+
     # Test search functionality
     # 测试搜索功能
     print("Testing search functionality...")
@@ -326,7 +322,7 @@ if __name__ == "__main__":
             print()
     except Exception as e:
         print(f"Error during search: {e}")
-    
+
     # Test DOI lookup functionality
     # 测试DOI查找功能
     if papers:
@@ -340,7 +336,7 @@ if __name__ == "__main__":
                 print("Failed to retrieve paper by DOI")
         except Exception as e:
             print(f"Error during DOI lookup: {e}")
-    
+
     # Test PDF download functionality (will return unsupported message)
     # 测试PDF下载功能（会返回不支持的提示）
     if papers:
@@ -350,7 +346,7 @@ if __name__ == "__main__":
             pdf_path = searcher.download_pdf(paper_id, "./downloads")
         except NotImplementedError as e:
             print(f"Expected error: {e}")
-    
+
     # Test paper reading functionality (will return unsupported message)
     # 测试论文阅读功能（会返回不支持的提示）
     if papers:

@@ -1,24 +1,19 @@
-from typing import List
+from typing import List, Dict, Any, Optional
+from datetime import datetime, timedelta
 import requests
 import os
-from datetime import datetime, timedelta
-from ..paper import Paper
+import time
+
+import feedparser
 from PyPDF2 import PdfReader
+from loguru import logger
 
-class PaperSource:
-    """Abstract base class for paper sources"""
-    def search(self, query: str, **kwargs) -> List[Paper]:
-        raise NotImplementedError
+from ..types import Paper, PaperSource
 
-    def download_pdf(self, paper_id: str, save_path: str) -> str:
-        raise NotImplementedError
 
-    def read_paper(self, paper_id: str, save_path: str) -> str:
-        raise NotImplementedError
-
-class MedRxivSearcher(PaperSource):
-    """Searcher for medRxiv papers"""
-    BASE_URL = "https://api.biorxiv.org/details/medrxiv"
+class BioRxivSearcher(PaperSource):
+    """Searcher for bioRxiv papers"""
+    BASE_URL = "https://api.biorxiv.org/details/biorxiv"
 
     def __init__(self):
         self.session = requests.Session()
@@ -28,10 +23,10 @@ class MedRxivSearcher(PaperSource):
 
     def search(self, query: str, max_results: int = 10, days: int = 30) -> List[Paper]:
         """
-        Search for papers on medRxiv by category within the last N days.
+        Search for papers on bioRxiv by category within the last N days.
 
         Args:
-            query: Category name to search for (e.g., "cardiovascular medicine").
+            query: Category name to search for (e.g., "cell biology").
             max_results: Maximum number of papers to return.
             days: Number of days to look back for papers.
 
@@ -41,17 +36,16 @@ class MedRxivSearcher(PaperSource):
         # Calculate date range: last N days
         end_date = datetime.now().strftime('%Y-%m-%d')
         start_date = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
-        
+
         # Format category: lowercase and replace spaces with underscores
         category = query.lower().replace(' ', '_')
-        
+
         papers = []
         cursor = 0
         while len(papers) < max_results:
             url = f"{self.BASE_URL}/{start_date}/{end_date}/{cursor}"
             if category:
                 url += f"?category={category}"
-
             tries = 0
             while tries < self.max_retries:
                 try:
@@ -67,17 +61,17 @@ class MedRxivSearcher(PaperSource):
                                 title=item['title'],
                                 authors=item['authors'].split('; '),
                                 abstract=item['abstract'],
-                                url=f"https://www.medrxiv.org/content/{item['doi']}v{item.get('version', '1')}",
-                                pdf_url=f"https://www.medrxiv.org/content/{item['doi']}v{item.get('version', '1')}.full.pdf",
+                                url=f"https://www.biorxiv.org/content/{item['doi']}v{item.get('version', '1')}",
+                                pdf_url=f"https://www.biorxiv.org/content/{item['doi']}v{item.get('version', '1')}.full.pdf",
                                 published_date=date,
                                 updated_date=date,
-                                source="medrxiv",
+                                source="biorxiv",
                                 categories=[item['category']],
                                 keywords=[],
                                 doi=item['doi']
                             ))
                         except Exception as e:
-                            print(f"Error parsing medRxiv entry: {e}")
+                            print(f"Error parsing bioRxiv entry: {e}")
                     if len(collection) < 100:
                         break  # No more results
                     cursor += 100
@@ -85,7 +79,7 @@ class MedRxivSearcher(PaperSource):
                 except requests.exceptions.RequestException as e:
                     tries += 1
                     if tries == self.max_retries:
-                        print(f"Failed to connect to medRxiv API after {self.max_retries} attempts: {e}")
+                        print(f"Failed to connect to bioRxiv API after {self.max_retries} attempts: {e}")
                         break
                     print(f"Attempt {tries} failed, retrying...")
             else:
@@ -96,7 +90,7 @@ class MedRxivSearcher(PaperSource):
 
     def download_pdf(self, paper_id: str, save_path: str) -> str:
         """
-        Download a PDF for a given paper ID from medRxiv.
+        Download a PDF for a given paper ID from bioRxiv.
 
         Args:
             paper_id: The DOI of the paper.
@@ -108,7 +102,7 @@ class MedRxivSearcher(PaperSource):
         if not paper_id:
             raise ValueError("Invalid paper_id: paper_id is empty")
 
-        pdf_url = f"https://www.medrxiv.org/content/{paper_id}v1.full.pdf"
+        pdf_url = f"https://www.biorxiv.org/content/{paper_id}v1.full.pdf"
         tries = 0
         while tries < self.max_retries:
             try:
@@ -128,22 +122,22 @@ class MedRxivSearcher(PaperSource):
                 if tries == self.max_retries:
                     raise Exception(f"Failed to download PDF after {self.max_retries} attempts: {e}")
                 print(f"Attempt {tries} failed, retrying...")
-    
+
     def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
         """
         Read a paper and convert it to text format.
-        
+
         Args:
-            paper_id: medRxiv DOI
+            paper_id: bioRxiv DOI
             save_path: Directory where the PDF is/will be saved
-            
+
         Returns:
             str: The extracted text content of the paper
         """
         pdf_path = f"{save_path}/{paper_id.replace('/', '_')}.pdf"
         if not os.path.exists(pdf_path):
             pdf_path = self.download_pdf(paper_id, save_path)
-        
+
         try:
             reader = PdfReader(pdf_path)
             text = ""

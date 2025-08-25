@@ -1,7 +1,7 @@
 import unittest
 import os
 import requests
-from paper_search_mcp.academic_platforms.semantic import SemanticSearcher
+from academic_mcp.sources.semantic import SemanticSearcher
 
 
 def check_semantic_accessible():

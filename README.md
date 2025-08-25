@@ -1,9 +1,8 @@
-# Paper Search MCP
+# Academic MCP
 
 A Model Context Protocol (MCP) server for searching and downloading academic papers from multiple sources, including arXiv, PubMed, bioRxiv, and Sci-Hub (optional). Designed for seamless integration with large language models like Claude Desktop.
 
-![PyPI](https://img.shields.io/pypi/v/paper-search-mcp.svg) ![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
-[![smithery badge](https://smithery.ai/badge/@openags/paper-search-mcp)](https://smithery.ai/server/@openags/paper-search-mcp)
+![PyPI](https://img.shields.io/pypi/v/academic-mcp.svg) ![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 
 ---
 
@@ -27,9 +26,7 @@ A Model Context Protocol (MCP) server for searching and downloading academic pap
 
 ## Overview
 
-`paper-search-mcp` is a Python-based MCP server that enables users to search and download academic papers from various platforms. It provides tools for searching papers (e.g., `search_arxiv`) and downloading PDFs (e.g., `download_arxiv`), making it ideal for researchers and AI-driven workflows. Built with the MCP Python SDK, it integrates seamlessly with LLM clients like Claude Desktop.
-
----
+`academic-mcp` is a Python-based MCP server that enables users to search and download academic papers from various platforms. It provides tools for searching papers (e.g., `search_arxiv`) and downloading PDFs (e.g., `download_arxiv`), making it ideal for researchers and AI-driven workflows. Built with the MCP Python SDK, it integrates seamlessly with LLM clients like Claude Desktop.
 
 ## Features
 
@@ -37,21 +34,11 @@ A Model Context Protocol (MCP) server for searching and downloading academic pap
 - **Standardized Output**: Papers are returned in a consistent dictionary format via the `Paper` class.
 - **Asynchronous Tools**: Efficiently handles network requests using `httpx`.
 - **MCP Integration**: Compatible with MCP clients for LLM context enhancement.
-- **Extensible Design**: Easily add new academic platforms by extending the `academic_platforms` module.
-
----
+- **Extensible Design**: Easily add new academic platforms by extending the `sources` module.
 
 ## Installation
 
-`paper-search-mcp` can be installed using `uv` or `pip`. Below are two approaches: a quick start for immediate use and a detailed setup for development.
-
-### Installing via Smithery
-
-To install paper-search-mcp for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@openags/paper-search-mcp):
-
-```bash
-npx -y @smithery/cli install @openags/paper-search-mcp --client claude
-```
+`academic-mcp` can be installed using `uv` or `pip`. Below are two approaches: a quick start for immediate use and a detailed setup for development.
 
 ### Quick Start
 
@@ -60,7 +47,7 @@ For users who want to quickly run the server:
 1. **Install Package**:
 
    ```bash
-   uv add paper-search-mcp
+   pip install academic-mcp
    ```
 
 2. **Configure Claude Desktop**:
@@ -68,23 +55,21 @@ For users who want to quickly run the server:
    ```json
    {
      "mcpServers": {
-       "paper_search_server": {
-         "command": "uv",
+       "academic-mcp": {
+         "command": "python",
          "args": [
-           "run",
-           "--directory",
-           "/path/to/your/paper-search-mcp",
            "-m",
-           "paper_search_mcp.server"
+           "academic_mcp"
          ],
          "env": {
-           "SEMANTIC_SCHOLAR_API_KEY": "" // Optional: For enhanced Semantic Scholar features
+           "SEMANTIC_SCHOLAR_API_KEY": "",
+           "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
          }
        }
      }
    }
    ```
-   > Note: Replace `/path/to/your/paper-search-mcp` with your actual installation path.
+   > Note: The `SEMANTIC_SCHOLAR_API_KEY` is optional and only required for enhanced Semantic Scholar features.
 
 ### For Development
 
@@ -97,8 +82,8 @@ For developers who want to modify the code or contribute:
    curl -LsSf https://astral.sh/uv/install.sh | sh
 
    # Clone repository
-   git clone https://github.com/openags/paper-search-mcp.git
-   cd paper-search-mcp
+   git clone https://github.com/LinXueyuanStdio/academic-mcp.git
+   cd academic-mcp
 
    # Create and activate virtual environment
    uv venv
@@ -108,14 +93,12 @@ For developers who want to modify the code or contribute:
 2. **Install Dependencies**:
 
    ```bash
-   # Install project in editable mode
-   uv add -e .
+   # Install dependencies (recommended)
+   uv pip install -e .
 
    # Add development dependencies (optional)
-   uv add pytest flake8
+   uv pip install pytest flake8
    ```
-
----
 
 ## Contributing
 
@@ -127,24 +110,22 @@ We welcome contributions! Here's how to get started:
 2. **Clone and Set Up**:
 
    ```bash
-   git clone https://github.com/yourusername/paper-search-mcp.git
-   cd paper-search-mcp
-   pip install -e ".[dev]"  # Install dev dependencies (if added to pyproject.toml)
+   git clone https://github.com/yourusername/academic-mcp.git
+   cd academic-mcp
+   uv pip install -e .  # Install in development mode
    ```
 
 3. **Make Changes**:
 
-   - Add new platforms in `academic_platforms/`.
+   - Add new platforms in `academic_mcp/sources/`.
    - Update tests in `tests/`.
 
 4. **Submit a Pull Request**:
    Push changes and create a PR on GitHub.
 
----
-
 ## Demo
 
-<img src="docs\images\demo.png" alt="Demo" width="800">
+<img src="docs/images/demo.png" alt="Demo" width="800">
 
 ## TODO
 
@@ -169,12 +150,10 @@ We welcome contributions! Here's how to get started:
 - [ ] CORE
 - [ ] Microsoft Academic
 
----
-
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
 
 ---
 
-Happy researching with `paper-search-mcp`! If you encounter issues, open a GitHub issue.
+Happy researching with `academic-mcp`! If you encounter issues, open a GitHub issue.

@@ -1,21 +1,22 @@
-# paper_search_mcp/sources/pubmed.py
-from typing import List
+import re
+import hashlib
 import requests
-from xml.etree import ElementTree as ET
-from datetime import datetime
-from ..paper import Paper
 import os
+import time
+import random
+from pathlib import Path
+from typing import List, Dict, Any, Optional
+from datetime import datetime, timedelta
 
-class PaperSource:
-    """Abstract base class for paper sources"""
-    def search(self, query: str, **kwargs) -> List[Paper]:
-        raise NotImplementedError
+import feedparser
+from bs4 import BeautifulSoup
+from xml.etree import ElementTree as ET
+from PyPDF2 import PdfReader
+from loguru import logger
 
-    def download_pdf(self, paper_id: str, save_path: str) -> str:
-        raise NotImplementedError
+from ..types import Paper, PaperSource
 
-    def read_paper(self, paper_id: str, save_path: str) -> str:
-        raise NotImplementedError
+
 
 class PubMedSearcher(PaperSource):
     """Searcher for PubMed papers"""
@@ -32,7 +33,7 @@ class PubMedSearcher(PaperSource):
         search_response = requests.get(self.SEARCH_URL, params=search_params)
         search_root = ET.fromstring(search_response.content)
         ids = [id.text for id in search_root.findall('.//Id')]
-        
+
         fetch_params = {
             'db': 'pubmed',
             'id': ','.join(ids),
@@ -40,13 +41,13 @@ class PubMedSearcher(PaperSource):
         }
         fetch_response = requests.get(self.FETCH_URL, params=fetch_params)
         fetch_root = ET.fromstring(fetch_response.content)
-        
+
         papers = []
         for article in fetch_root.findall('.//PubmedArticle'):
             try:
                 pmid = article.find('.//PMID').text
                 title = article.find('.//ArticleTitle').text
-                authors = [f"{author.find('LastName').text} {author.find('Initials').text}" 
+                authors = [f"{author.find('LastName').text} {author.find('Initials').text}"
                            for author in article.findall('.//Author')]
                 abstract = article.find('.//AbstractText').text if article.find('.//AbstractText') is not None else ''
                 pub_date = article.find('.//PubDate/Year').text
@@ -79,7 +80,7 @@ class PubMedSearcher(PaperSource):
 
         Returns:
             str: Error message indicating PDF download is not supported
-        
+
         Raises:
             NotImplementedError: Always raises this error as PubMed doesn't provide direct PDF access
         """
@@ -105,7 +106,7 @@ class PubMedSearcher(PaperSource):
 if __name__ == "__main__":
     # 测试 PubMedSearcher 的功能
     searcher = PubMedSearcher()
-    
+
     # 测试搜索功能
     print("Testing search functionality...")
     query = "machine learning"
@@ -120,7 +121,7 @@ if __name__ == "__main__":
             print(f"   URL: {paper.url}\n")
     except Exception as e:
         print(f"Error during search: {e}")
-    
+
     # 测试 PDF 下载功能（会返回不支持的提示）
     if papers:
         print("\nTesting PDF download functionality...")
@@ -129,7 +130,7 @@ if __name__ == "__main__":
             pdf_path = searcher.download_pdf(paper_id, "./downloads")
         except NotImplementedError as e:
             print(f"Expected error: {e}")
-    
+
     # 测试论文阅读功能（会返回不支持的提示）
     if papers:
         print("\nTesting paper reading functionality...")

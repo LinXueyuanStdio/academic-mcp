@@ -1,29 +1,21 @@
-from typing import List, Optional
-from datetime import datetime
-import requests
+from typing import List, Dict, Any, Optional
+from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
+import requests
+import os
 import time
 import random
-from ..paper import Paper
-import logging
 
-logger = logging.getLogger(__name__)
+import feedparser
+from PyPDF2 import PdfReader
+from loguru import logger
 
-class PaperSource:
-    """Abstract base class for paper sources"""
-    def search(self, query: str, **kwargs) -> List[Paper]:
-        raise NotImplementedError
+from ..types import Paper, PaperSource
 
-    def download_pdf(self, paper_id: str, save_path: str) -> str:
-        raise NotImplementedError
-
-    def read_paper(self, paper_id: str, save_path: str) -> str:
-        raise NotImplementedError
-    
 
 class GoogleScholarSearcher(PaperSource):
     """Custom implementation of Google Scholar paper search"""
-    
+
     SCHOLAR_URL = "https://scholar.google.com/scholar"
     BROWSERS = [
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -112,7 +104,7 @@ class GoogleScholarSearcher(PaperSource):
                 # Make request with random delay
                 time.sleep(random.uniform(1.0, 3.0))
                 response = self.session.get(self.SCHOLAR_URL, params=params)
-                
+
                 if response.status_code != 200:
                     logger.error(f"Search failed with status {response.status_code}")
                     break
@@ -128,7 +120,7 @@ class GoogleScholarSearcher(PaperSource):
                 for item in results:
                     if len(papers) >= max_results:
                         break
-                        
+
                     paper = self._parse_paper(item)
                     if paper:
                         papers.append(paper)
@@ -144,7 +136,7 @@ class GoogleScholarSearcher(PaperSource):
     def download_pdf(self, paper_id: str, save_path: str) -> str:
         """
         Google Scholar doesn't support direct PDF downloads
-        
+
         Raises:
             NotImplementedError: Always raises this error
         """
@@ -156,7 +148,7 @@ class GoogleScholarSearcher(PaperSource):
     def read_paper(self, paper_id: str, save_path: str = "./downloads") -> str:
         """
         Google Scholar doesn't support direct paper reading
-        
+
         Returns:
             str: Message indicating the feature is not supported
         """
@@ -168,11 +160,11 @@ class GoogleScholarSearcher(PaperSource):
 if __name__ == "__main__":
     # Test Google Scholar searcher
     searcher = GoogleScholarSearcher()
-    
+
     print("Testing search functionality...")
     query = "machine learning"
     max_results = 5
-    
+
     try:
         papers = searcher.search(query, max_results=max_results)
         print(f"\nFound {len(papers)} papers for query '{query}':")
