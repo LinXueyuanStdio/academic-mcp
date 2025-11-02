@@ -26,13 +26,19 @@ A Model Context Protocol (MCP) server for searching and downloading academic pap
 
 ## Overview
 
-`academic-mcp` is a Python-based MCP server that enables users to search and download academic papers from various platforms. It provides tools for searching papers (e.g., `search_arxiv`) and downloading PDFs (e.g., `download_arxiv`), making it ideal for researchers and AI-driven workflows. Built with the MCP Python SDK, it integrates seamlessly with LLM clients like Claude Desktop.
+`academic-mcp` is a Python-based MCP server that enables users to search, download, and read academic papers from various platforms. It provides three main tools:
+- **`paper_search`**: Search papers across multiple academic databases
+- **`paper_download`**: Download paper PDFs, return path of downloaded files
+- **`paper_read`**: Extract and read text content from papers
+
+Built with FastMCP, it integrates seamlessly with LLM clients like Claude Desktop, making it ideal for researchers and AI-driven workflows.
 
 ## Features
 
-- **Multi-Source Support**: Search and download papers from arXiv, PubMed, bioRxiv, medRxiv, Google Scholar, IACR ePrint Archive, Semantic Scholar.
+- **Multi-Source Support**: Search and download papers from arXiv, PubMed, bioRxiv, medRxiv, Google Scholar, IACR ePrint Archive, Semantic Scholar, and CrossRef.
+- **Unified Interface**: All platforms accessible through consistent `paper_search`, `paper_download`, and `paper_read` tools.
 - **Standardized Output**: Papers are returned in a consistent dictionary format via the `Paper` class.
-- **Asynchronous Tools**: Efficiently handles network requests using `httpx`.
+- **Asynchronous Operations**: Efficiently handles concurrent searches and downloads using `httpx` and async/await.
 - **MCP Integration**: Compatible with MCP clients for LLM context enhancement.
 - **Extensible Design**: Easily add new academic platforms by extending the `sources` module.
 
@@ -138,6 +144,7 @@ We welcome contributions! Here's how to get started:
 - [√] Google Scholar
 - [√] IACR ePrint Archive
 - [√] Semantic Scholar
+- [√] CrossRef
 - [ ] PubMed Central (PMC)
 - [ ] Science Direct
 - [ ] Springer Link
