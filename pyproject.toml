@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "academic-mcp"
-version = "0.1.3"
+version = "0.1.4"
 description = "A MCP server for searching and downloading academic papers from multiple sources."
 readme = "README.md"
 requires-python = ">=3.10"

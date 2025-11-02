@@ -12,15 +12,16 @@ A Model Context Protocol (MCP) server for searching and downloading academic pap
 - [Features](#features)
 - [Installation](#installation)
   - [Quick Start](#quick-start)
-    - [Install Package](#install-package)
-    - [Configure Claude Desktop](#configure-claude-desktop)
   - [For Development](#for-development)
-    - [Setup Environment](#setup-environment)
-    - [Install Dependencies](#install-dependencies)
+- [Usage](#usage)
+  - [Search Papers](#1-search-papers-paper_search)
+  - [Download Papers](#2-download-papers-paper_download)
+  - [Read Papers](#3-read-papers-paper_read)
+  - [Environment Variables](#environment-variables)
 - [Contributing](#contributing)
 - [Demo](#demo)
-- [License](#license)
 - [TODO](#todo)
+- [License](#license)
 
 ---
 
@@ -105,6 +106,70 @@ For developers who want to modify the code or contribute:
    # Add development dependencies (optional)
    uv pip install pytest flake8
    ```
+
+---
+
+## Usage
+
+Once configured, `academic-mcp` provides three main tools accessible through Claude Desktop or any MCP-compatible client:
+
+### 1. Search Papers (`paper_search`)
+
+Search for academic papers across multiple sources:
+
+```python
+# Search arXiv for machine learning papers
+paper_search([
+    {"searcher": "arxiv", "query": "machine learning", "max_results": 5}
+])
+
+# Search multiple platforms simultaneously
+paper_search([
+    {"searcher": "arxiv", "query": "deep learning", "max_results": 5},
+    {"searcher": "pubmed", "query": "cancer immunotherapy", "max_results": 3},
+    {"searcher": "semantic", "query": "climate change", "max_results": 4, "year": "2020-2023"}
+])
+
+# Search all platforms (omit "searcher" parameter)
+paper_search([
+    {"query": "quantum computing", "max_results": 10}
+])
+```
+
+### 2. Download Papers (`paper_download`)
+
+Download paper PDFs using their identifiers:
+
+```python
+paper_download([
+    {"searcher": "arxiv", "paper_id": "2106.12345"},
+    {"searcher": "pubmed", "paper_id": "32790614"},
+    {"searcher": "biorxiv", "paper_id": "10.1101/2020.01.01.123456"},
+    {"searcher": "semantic", "paper_id": "DOI:10.18653/v1/N18-3011"}
+])
+```
+
+### 3. Read Papers (`paper_read`)
+
+Extract and read text content from papers:
+
+```python
+# Read an arXiv paper
+paper_read(searcher="arxiv", paper_id="2106.12345")
+
+# Read a PubMed paper
+paper_read(searcher="pubmed", paper_id="32790614")
+
+# Read a Semantic Scholar paper
+paper_read(searcher="semantic", paper_id="DOI:10.18653/v1/N18-3011")
+```
+
+### Environment Variables
+
+- `SEMANTIC_SCHOLAR_API_KEY`: Optional API key for enhanced Semantic Scholar features
+- `ACADEMIC_MCP_DOWNLOAD_PATH`: Directory for downloaded PDFs (default: `./downloads`)
+
+---
 
 ## Contributing
 
