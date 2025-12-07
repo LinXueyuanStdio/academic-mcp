@@ -4,7 +4,7 @@
 
 🔬 `academic-mcp` is a Python-based MCP server that enables users to search, download, and read academic papers from various platforms. It provides three main tools:
 - 🔎 **`paper_search`**: Search papers across multiple academic databases
-- 📥 **`paper_download`**: Download paper PDFs, return path of downloaded files
+- 📥 **`paper_download`**: Download paper PDFs, return paths of downloaded files
 - 📖 **`paper_read`**: Extract and read text content from papers
 
 ![PyPI](https://img.shields.io/pypi/v/academic-mcp.svg) ![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
@@ -13,6 +13,8 @@
 
 ## 📑 Table of Contents
 
+- [🎬 Screenshot](#-screenshot)
+- [📝 TODO](#-todo)
 - [✨ Features](#-features)
 - [📦 Installation](#-installation)
   - [⚡ Quick Start](#-quick-start)
@@ -23,8 +25,6 @@
   - [📖 Read Papers](#3-read-papers-paper_read)
   - [⚙️ Environment Variables](#️-environment-variables)
 - [🤝 Contributing](#-contributing)
-- [🎬 Demo](#-demo)
-- [📝 TODO](#-todo)
 - [📄 License](#-license)
 
 ---
@@ -37,6 +37,34 @@
 - ⚡ **Asynchronous Operations**: Efficiently handles concurrent searches and downloads using `httpx` and async/await.
 - 🔌 **MCP Integration**: Compatible with MCP clients for LLM context enhancement.
 - 🧩 **Extensible Design**: Easily add new academic platforms by extending the `sources` module.
+
+## 🎬 Screenshot
+
+<img src="assets/screenshot.png" alt="Screenshot" width="800">
+
+## 📝 TODO
+
+Planned Academic Platforms
+
+- [x] arXiv
+- [x] PubMed
+- [x] bioRxiv
+- [x] medRxiv
+- [x] Google Scholar
+- [x] IACR ePrint Archive
+- [x] Semantic Scholar
+- [x] CrossRef
+- [ ] PubMed Central (PMC)
+- [ ] Science Direct
+- [ ] Springer Link
+- [ ] IEEE Xplore
+- [ ] ACM Digital Library
+- [ ] Web of Science
+- [ ] Scopus
+- [ ] JSTOR
+- [ ] ResearchGate
+- [ ] CORE
+- [ ] Microsoft Academic
 
 ## 📦 Installation
 
@@ -188,34 +216,6 @@ We welcome contributions! Here's how to get started:
 
 4. **Submit a Pull Request**:
    Push changes and create a PR on GitHub.
-
-## 🎬 Demo
-
-<img src="docs/images/demo.png" alt="Demo" width="800">
-
-## 📝 TODO
-
-### Planned Academic Platforms
-
-- [x] arXiv
-- [x] PubMed
-- [x] bioRxiv
-- [x] medRxiv
-- [x] Google Scholar
-- [x] IACR ePrint Archive
-- [x] Semantic Scholar
-- [x] CrossRef
-- [ ] PubMed Central (PMC)
-- [ ] Science Direct
-- [ ] Springer Link
-- [ ] IEEE Xplore
-- [ ] ACM Digital Library
-- [ ] Web of Science
-- [ ] Scopus
-- [ ] JSTOR
-- [ ] ResearchGate
-- [ ] CORE
-- [ ] Microsoft Academic
 
 ## 📄 License
 
