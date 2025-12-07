@@ -1,53 +1,48 @@
-# Academic MCP
+# 📚 Academic MCP
 
-A Model Context Protocol (MCP) server for searching and downloading academic papers from multiple sources, including arXiv, PubMed, bioRxiv, and Sci-Hub (optional). Designed for seamless integration with large language models like Claude Desktop.
+[English](README.md) | [中文](README_zh.md)
+
+🔬 `academic-mcp` is a Python-based MCP server that enables users to search, download, and read academic papers from various platforms. It provides three main tools:
+- 🔎 **`paper_search`**: Search papers across multiple academic databases
+- 📥 **`paper_download`**: Download paper PDFs, return path of downloaded files
+- 📖 **`paper_read`**: Extract and read text content from papers
 
 ![PyPI](https://img.shields.io/pypi/v/academic-mcp.svg) ![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 
 ---
 
-## Table of Contents
+## 📑 Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Installation](#installation)
-  - [Quick Start](#quick-start)
-  - [For Development](#for-development)
-- [Usage](#usage)
-  - [Search Papers](#1-search-papers-paper_search)
-  - [Download Papers](#2-download-papers-paper_download)
-  - [Read Papers](#3-read-papers-paper_read)
-  - [Environment Variables](#environment-variables)
-- [Contributing](#contributing)
-- [Demo](#demo)
-- [TODO](#todo)
-- [License](#license)
+- [✨ Features](#-features)
+- [📦 Installation](#-installation)
+  - [⚡ Quick Start](#-quick-start)
+  - [🛠️ For Development](#️-for-development)
+- [🚀 Usage](#-usage)
+  - [🔎 Search Papers](#1-search-papers-paper_search)
+  - [📥 Download Papers](#2-download-papers-paper_download)
+  - [📖 Read Papers](#3-read-papers-paper_read)
+  - [⚙️ Environment Variables](#️-environment-variables)
+- [🤝 Contributing](#-contributing)
+- [🎬 Demo](#-demo)
+- [📝 TODO](#-todo)
+- [📄 License](#-license)
 
 ---
 
-## Overview
+## ✨ Features
 
-`academic-mcp` is a Python-based MCP server that enables users to search, download, and read academic papers from various platforms. It provides three main tools:
-- **`paper_search`**: Search papers across multiple academic databases
-- **`paper_download`**: Download paper PDFs, return path of downloaded files
-- **`paper_read`**: Extract and read text content from papers
+- 🌐 **Multi-Source Support**: Search and download papers from arXiv, PubMed, bioRxiv, medRxiv, Google Scholar, IACR ePrint Archive, Semantic Scholar, and CrossRef.
+- 🎯 **Unified Interface**: All platforms accessible through consistent `paper_search`, `paper_download`, and `paper_read` tools.
+- 📊 **Standardized Output**: Papers are returned in a consistent dictionary format via the `Paper` class.
+- ⚡ **Asynchronous Operations**: Efficiently handles concurrent searches and downloads using `httpx` and async/await.
+- 🔌 **MCP Integration**: Compatible with MCP clients for LLM context enhancement.
+- 🧩 **Extensible Design**: Easily add new academic platforms by extending the `sources` module.
 
-Built with FastMCP, it integrates seamlessly with LLM clients like Claude Desktop, making it ideal for researchers and AI-driven workflows.
-
-## Features
-
-- **Multi-Source Support**: Search and download papers from arXiv, PubMed, bioRxiv, medRxiv, Google Scholar, IACR ePrint Archive, Semantic Scholar, and CrossRef.
-- **Unified Interface**: All platforms accessible through consistent `paper_search`, `paper_download`, and `paper_read` tools.
-- **Standardized Output**: Papers are returned in a consistent dictionary format via the `Paper` class.
-- **Asynchronous Operations**: Efficiently handles concurrent searches and downloads using `httpx` and async/await.
-- **MCP Integration**: Compatible with MCP clients for LLM context enhancement.
-- **Extensible Design**: Easily add new academic platforms by extending the `sources` module.
-
-## Installation
+## 📦 Installation
 
 `academic-mcp` can be installed using `uv` or `pip`. Below are two approaches: a quick start for immediate use and a detailed setup for development.
 
-### Quick Start
+### ⚡ Quick Start
 
 For users who want to quickly run the server:
 
@@ -78,7 +73,7 @@ For users who want to quickly run the server:
    ```
    > Note: The `SEMANTIC_SCHOLAR_API_KEY` is optional and only required for enhanced Semantic Scholar features.
 
-### For Development
+### 🛠️ For Development
 
 For developers who want to modify the code or contribute:
 
@@ -109,7 +104,7 @@ For developers who want to modify the code or contribute:
 
 ---
 
-## Usage
+## 🚀 Usage
 
 Once configured, `academic-mcp` provides three main tools accessible through Claude Desktop or any MCP-compatible client:
 
@@ -171,7 +166,7 @@ paper_read(searcher="semantic", paper_id="DOI:10.18653/v1/N18-3011")
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 We welcome contributions! Here's how to get started:
 
@@ -194,22 +189,22 @@ We welcome contributions! Here's how to get started:
 4. **Submit a Pull Request**:
    Push changes and create a PR on GitHub.
 
-## Demo
+## 🎬 Demo
 
 <img src="docs/images/demo.png" alt="Demo" width="800">
 
-## TODO
+## 📝 TODO
 
 ### Planned Academic Platforms
 
-- [√] arXiv
-- [√] PubMed
-- [√] bioRxiv
-- [√] medRxiv
-- [√] Google Scholar
-- [√] IACR ePrint Archive
-- [√] Semantic Scholar
-- [√] CrossRef
+- [x] arXiv
+- [x] PubMed
+- [x] bioRxiv
+- [x] medRxiv
+- [x] Google Scholar
+- [x] IACR ePrint Archive
+- [x] Semantic Scholar
+- [x] CrossRef
 - [ ] PubMed Central (PMC)
 - [ ] Science Direct
 - [ ] Springer Link
@@ -222,7 +217,7 @@ We welcome contributions! Here's how to get started:
 - [ ] CORE
 - [ ] Microsoft Academic
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
 
