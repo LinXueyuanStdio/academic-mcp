@@ -68,38 +68,209 @@ Planned Academic Platforms
 
 ## 📦 Installation
 
-`academic-mcp` can be installed using `uv` or `pip`. Below are two approaches: a quick start for immediate use and a detailed setup for development.
+`academic-mcp` can be installed using `uv` or `pip`. Below are detailed installation guides for different scenarios.
 
-### ⚡ Quick Start
+### ⚡ Quick Install
 
-For users who want to quickly run the server:
+Install the package:
 
-1. **Install Package**:
+```bash
+pip install academic-mcp
+```
 
-   ```bash
-   pip install academic-mcp
-   ```
+Or using uv (recommended for faster installation):
 
-2. **Configure Claude Desktop**:
-   Add this configuration to `~/Library/Application Support/Claude/claude_desktop_config.json` (Mac) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
-   ```json
-   {
-     "mcpServers": {
-       "academic-mcp": {
-         "command": "python",
-         "args": [
-           "-m",
-           "academic_mcp"
-         ],
-         "env": {
-           "SEMANTIC_SCHOLAR_API_KEY": "",
-           "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
-         }
-       }
-     }
-   }
-   ```
-   > Note: The `SEMANTIC_SCHOLAR_API_KEY` is optional and only required for enhanced Semantic Scholar features.
+```bash
+uv pip install academic-mcp
+```
+
+### 🔧 MCP Client Configuration
+
+Choose your MCP client and follow the configuration steps:
+
+<details>
+<summary><b>1️⃣ Claude Desktop</b></summary>
+
+**Location:**
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+**Configuration:**
+```json
+{
+  "mcpServers": {
+    "academic-mcp": {
+      "command": "python",
+      "args": ["-m", "academic_mcp"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": "",
+        "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
+      }
+    }
+  }
+}
+```
+
+**Using with uvx (alternative):**
+```json
+{
+  "mcpServers": {
+    "academic-mcp": {
+      "command": "uvx",
+      "args": ["academic-mcp"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": "",
+        "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>2️⃣ Claude Code (CLI)</b></summary>
+
+**Location:** `~/.config/claude/config.json`
+
+**Configuration:**
+```json
+{
+  "mcpServers": {
+    "academic-mcp": {
+      "command": "python",
+      "args": ["-m", "academic_mcp"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": "",
+        "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
+      }
+    }
+  }
+}
+```
+
+**Verify Installation:**
+```bash
+# Check if academic-mcp is loaded
+claude mcp list
+
+# Test the server
+claude mcp test academic-mcp
+```
+
+</details>
+
+<details>
+<summary><b>3️⃣ Cline (VS Code Extension)</b></summary>
+
+**Location:** VS Code Settings → Extensions → Cline → MCP Settings
+
+**Method 1: Through VS Code Settings UI**
+1. Open VS Code Settings (Cmd/Ctrl + ,)
+2. Search for "Cline MCP"
+3. Click "Edit in settings.json"
+4. Add the configuration:
+
+```json
+{
+  "cline.mcpServers": {
+    "academic-mcp": {
+      "command": "python",
+      "args": ["-m", "academic_mcp"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": "",
+        "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
+      }
+    }
+  }
+}
+```
+
+**Method 2: Direct settings.json Edit**
+
+Edit `~/.config/Code/User/settings.json` (Linux/macOS) or `%APPDATA%\Code\User\settings.json` (Windows):
+
+```json
+{
+  "cline.mcpServers": {
+    "academic-mcp": {
+      "command": "python",
+      "args": ["-m", "academic_mcp"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": "",
+        "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>4️⃣ Zed Editor</b></summary>
+
+**Location:** `~/.config/zed/settings.json`
+
+**Configuration:**
+```json
+{
+  "context_servers": {
+    "academic-mcp": {
+      "command": {
+        "path": "python",
+        "args": ["-m", "academic_mcp"]
+      },
+      "settings": {
+        "env": {
+          "SEMANTIC_SCHOLAR_API_KEY": "",
+          "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
+        }
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>5️⃣ Custom MCP Client</b></summary>
+
+For other MCP clients, use the standard MCP server configuration:
+
+**Server Command:**
+```bash
+python -m academic_mcp
+```
+
+**Environment Variables:**
+- `SEMANTIC_SCHOLAR_API_KEY`: Optional API key for Semantic Scholar
+- `ACADEMIC_MCP_DOWNLOAD_PATH`: Download directory (default: `./downloads`)
+
+**Server Capabilities:**
+- Tools: `paper_search`, `paper_download`, `paper_read`
+- Transport: stdio
+- Protocol: MCP 1.0
+
+</details>
+
+### 📝 Configuration Notes
+
+> **API Keys:**
+> - `SEMANTIC_SCHOLAR_API_KEY` is optional and only enhances Semantic Scholar features
+> - All other sources work without API keys
+>
+> **Download Path:**
+> - Use absolute paths for `ACADEMIC_MCP_DOWNLOAD_PATH` to avoid confusion
+> - Ensure the directory exists or the server will create it
+> - Example: `/Users/yourusername/Documents/papers` or `C:\Users\yourusername\papers`
+>
+> **Python Environment:**
+> - Ensure `python` command points to Python 3.10+
+> - For virtual environments, use the full path: `/path/to/venv/bin/python`
+> - For conda: `/path/to/conda/envs/yourenv/bin/python`
 
 ### 🛠️ For Development
 

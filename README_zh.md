@@ -68,38 +68,209 @@
 
 ## 📦 安装
 
-`academic-mcp` 可以使用 `uv` 或 `pip` 安装。以下是两种方法：快速开始用于立即使用，详细设置用于开发。
+`academic-mcp` 可以使用 `uv` 或 `pip` 安装。以下是针对不同场景的详细安装指南。
 
-### ⚡ 快速开始
+### ⚡ 快速安装
 
-对于想要快速运行服务器的用户：
+安装软件包：
 
-1. **安装包**：
+```bash
+pip install academic-mcp
+```
 
-   ```bash
-   pip install academic-mcp
-   ```
+或使用 uv（推荐，安装更快）：
 
-2. **配置 Claude Desktop**：
-   将此配置添加到 `~/Library/Application Support/Claude/claude_desktop_config.json`（Mac）或 `%APPDATA%\Claude\claude_desktop_config.json`（Windows）：
-   ```json
-   {
-     "mcpServers": {
-       "academic-mcp": {
-         "command": "python",
-         "args": [
-           "-m",
-           "academic_mcp"
-         ],
-         "env": {
-           "SEMANTIC_SCHOLAR_API_KEY": "",
-           "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
-         }
-       }
-     }
-   }
-   ```
-   > 注意：`SEMANTIC_SCHOLAR_API_KEY` 是可选的，仅在需要增强 Semantic Scholar 功能时使用。
+```bash
+uv pip install academic-mcp
+```
+
+### 🔧 MCP 客户端配置
+
+选择您使用的 MCP 客户端并按照配置步骤操作：
+
+<details>
+<summary><b>1️⃣ Claude Desktop（桌面应用）</b></summary>
+
+**配置文件位置：**
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+**配置内容：**
+```json
+{
+  "mcpServers": {
+    "academic-mcp": {
+      "command": "python",
+      "args": ["-m", "academic_mcp"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": "",
+        "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
+      }
+    }
+  }
+}
+```
+
+**使用 uvx（替代方案）：**
+```json
+{
+  "mcpServers": {
+    "academic-mcp": {
+      "command": "uvx",
+      "args": ["academic-mcp"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": "",
+        "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>2️⃣ Claude Code（命令行工具）</b></summary>
+
+**配置文件位置：** `~/.config/claude/config.json`
+
+**配置内容：**
+```json
+{
+  "mcpServers": {
+    "academic-mcp": {
+      "command": "python",
+      "args": ["-m", "academic_mcp"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": "",
+        "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
+      }
+    }
+  }
+}
+```
+
+**验证安装：**
+```bash
+# 检查 academic-mcp 是否已加载
+claude mcp list
+
+# 测试服务器
+claude mcp test academic-mcp
+```
+
+</details>
+
+<details>
+<summary><b>3️⃣ Cline（VS Code 扩展）</b></summary>
+
+**配置位置：** VS Code 设置 → 扩展 → Cline → MCP 设置
+
+**方法 1：通过 VS Code 设置界面**
+1. 打开 VS Code 设置（Cmd/Ctrl + ,）
+2. 搜索 "Cline MCP"
+3. 点击 "在 settings.json 中编辑"
+4. 添加配置：
+
+```json
+{
+  "cline.mcpServers": {
+    "academic-mcp": {
+      "command": "python",
+      "args": ["-m", "academic_mcp"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": "",
+        "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
+      }
+    }
+  }
+}
+```
+
+**方法 2：直接编辑 settings.json**
+
+编辑 `~/.config/Code/User/settings.json`（Linux/macOS）或 `%APPDATA%\Code\User\settings.json`（Windows）：
+
+```json
+{
+  "cline.mcpServers": {
+    "academic-mcp": {
+      "command": "python",
+      "args": ["-m", "academic_mcp"],
+      "env": {
+        "SEMANTIC_SCHOLAR_API_KEY": "",
+        "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>4️⃣ Zed 编辑器</b></summary>
+
+**配置文件位置：** `~/.config/zed/settings.json`
+
+**配置内容：**
+```json
+{
+  "context_servers": {
+    "academic-mcp": {
+      "command": {
+        "path": "python",
+        "args": ["-m", "academic_mcp"]
+      },
+      "settings": {
+        "env": {
+          "SEMANTIC_SCHOLAR_API_KEY": "",
+          "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
+        }
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>5️⃣ 自定义 MCP 客户端</b></summary>
+
+对于其他 MCP 客户端，使用标准的 MCP 服务器配置：
+
+**服务器命令：**
+```bash
+python -m academic_mcp
+```
+
+**环境变量：**
+- `SEMANTIC_SCHOLAR_API_KEY`: Semantic Scholar 的可选 API 密钥
+- `ACADEMIC_MCP_DOWNLOAD_PATH`: 下载目录（默认：`./downloads`）
+
+**服务器功能：**
+- 工具：`paper_search`、`paper_download`、`paper_read`
+- 传输方式：stdio
+- 协议：MCP 1.0
+
+</details>
+
+### 📝 配置说明
+
+> **API 密钥：**
+> - `SEMANTIC_SCHOLAR_API_KEY` 是可选的，仅用于增强 Semantic Scholar 功能
+> - 所有其他数据源无需 API 密钥即可工作
+>
+> **下载路径：**
+> - 建议使用绝对路径设置 `ACADEMIC_MCP_DOWNLOAD_PATH` 以避免混淆
+> - 确保目录存在，或服务器将自动创建
+> - 示例：`/Users/yourusername/Documents/papers` 或 `C:\Users\yourusername\papers`
+>
+> **Python 环境：**
+> - 确保 `python` 命令指向 Python 3.10+
+> - 对于虚拟环境，使用完整路径：`/path/to/venv/bin/python`
+> - 对于 conda：`/path/to/conda/envs/yourenv/bin/python`
 
 ### 🛠️ 开发环境
 
