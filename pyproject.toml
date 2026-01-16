@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "academic-mcp"
-version = "0.1.7"
+version = "0.1.8"
 description = "A MCP server for searching and downloading academic papers from multiple sources."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -17,8 +17,7 @@ authors = [
 dependencies = [
   "requests",
   "feedparser",
-  "fastmcp",
-  "mcp[cli]>=1.6.0",
+  "mcp[cli]>=1.28.1",
   "PyPDF2>=3.0.0",
   "beautifulsoup4>=4.12.0",
   "lxml>=4.9.0", # Better HTML parser for BeautifulSoup

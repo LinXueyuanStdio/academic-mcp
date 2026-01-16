@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Literal, Optional, cast
 
 import httpx
 from loguru import logger
-from fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP
 from mcp.types import TextContent
 from pydantic import BaseModel, Field, field_validator, model_validator
 import typer
@@ -440,15 +440,17 @@ def run(
     默认使用 stdio（适配 MCP 客户端）。如需网络服务（SSE/HTTP），设置环境变量：
     - `ACADEMIC_MCP_TRANSPORT=sse` 或 `ACADEMIC_MCP_TRANSPORT=streamable-http`
     """
-    log_level = "debug" if debug else "info"
+    mcp.settings.host = host
+    mcp.settings.port = port
+    mcp.settings.log_level = "DEBUG" if debug else "INFO"
 
     if not transport or transport == "stdio":
         logger.info("Starting Academic MCP server with stdio transport")
-        mcp.run(transport="stdio", log_level=log_level)
+        mcp.run(transport="stdio")
         return
 
     logger.info(f"Starting Academic MCP server on {host}:{port} with transport '{transport}'")
-    mcp.run(transport=transport, host=host, port=port, log_level=log_level)
+    mcp.run(transport=transport)
 
 
 def main() -> None:
