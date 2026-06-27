@@ -180,7 +180,7 @@ class WOSSearcher(PaperSource):
                 paper_id=uid,
                 title=title,
                 authors=authors,
-                abstract="",
+                abstract=doc.get("abstract", ""),
                 doi=identifiers.get("doi", ""),
                 published_date=published_date,
                 pdf_url="",
