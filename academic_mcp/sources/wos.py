@@ -117,7 +117,7 @@ class WOSSearcher(PaperSource):
 
         try:
             reader = PdfReader(pdf_path)
-            text = "".join(page.extract_text() + "\n" for page in reader.pages)
+            text = "".join((page.extract_text() or "") + "\n" for page in reader.pages)
             return text.strip()
         except Exception as e:
             logger.error(f"Error reading PDF for {paper_id}: {e}")
