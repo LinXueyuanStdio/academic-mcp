@@ -116,6 +116,7 @@ academic-mcp
         "IEEE_API_KEY": "",
         "SCOPUS_API_KEY": "",
         "CORE_API_KEY": "",
+        "WOS_API_KEY": "",
         "ACADEMIC_MCP_ENABLED_SOURCES": "arxiv,pubmed,pmc,biorxiv,medrxiv,semantic,core,crossref,google_scholar,iacr",
         "ACADEMIC_MCP_DISABLED_SOURCES": "ieee,scopus,springer,sciencedirect,wos,acm,jstor",
         "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
@@ -130,15 +131,17 @@ academic-mcp
 <details>
 <summary><b>2️⃣ Claude Code（命令行工具）</b></summary>
 
-**配置文件位置：** `~/.config/claude/config.json`
+**配置文件位置：**
+- 用户级：`~/.claude/settings.json`
+- 项目级：`.mcp.json`
 
 **配置内容：**
 ```json
 {
   "mcpServers": {
     "academic-mcp": {
-      "command": "python",
-      "args": ["-m", "academic_mcp"],
+      "command": "academic-mcp",
+      "args": [],
       "env": {
         "SEMANTIC_SCHOLAR_API_KEY": "",
         "SCIENCEDIRECT_API_KEY": "",
@@ -146,6 +149,7 @@ academic-mcp
         "IEEE_API_KEY": "",
         "SCOPUS_API_KEY": "",
         "CORE_API_KEY": "",
+        "WOS_API_KEY": "",
         "ACADEMIC_MCP_ENABLED_SOURCES": "arxiv,pubmed,pmc,biorxiv,medrxiv,semantic,core,crossref,google_scholar,iacr",
         "ACADEMIC_MCP_DISABLED_SOURCES": "ieee,scopus,springer,sciencedirect,wos,acm,jstor",
         "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
@@ -154,6 +158,8 @@ academic-mcp
   }
 }
 ```
+
+> **提示：** 你也可以使用 `"command": "python"` 配合 `"args": ["-m", "academic_mcp"]`，如果你更习惯通过 Python 模块运行。
 
 **验证安装：**
 ```bash
@@ -181,8 +187,8 @@ claude mcp test academic-mcp
 {
   "cline.mcpServers": {
     "academic-mcp": {
-      "command": "python",
-      "args": ["-m", "academic_mcp"],
+      "command": "academic-mcp",
+      "args": [],
       "env": {
         "SEMANTIC_SCHOLAR_API_KEY": "",
         "SCIENCEDIRECT_API_KEY": "",
@@ -190,6 +196,7 @@ claude mcp test academic-mcp
         "IEEE_API_KEY": "",
         "SCOPUS_API_KEY": "",
         "CORE_API_KEY": "",
+        "WOS_API_KEY": "",
         "ACADEMIC_MCP_ENABLED_SOURCES": "arxiv,pubmed,pmc,biorxiv,medrxiv,semantic,core,crossref,google_scholar,iacr",
         "ACADEMIC_MCP_DISABLED_SOURCES": "ieee,scopus,springer,sciencedirect,wos,acm,jstor",
         "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
@@ -207,8 +214,8 @@ claude mcp test academic-mcp
 {
   "cline.mcpServers": {
     "academic-mcp": {
-      "command": "python",
-      "args": ["-m", "academic_mcp"],
+      "command": "academic-mcp",
+      "args": [],
       "env": {
         "SEMANTIC_SCHOLAR_API_KEY": "",
         "SCIENCEDIRECT_API_KEY": "",
@@ -216,6 +223,7 @@ claude mcp test academic-mcp
         "IEEE_API_KEY": "",
         "SCOPUS_API_KEY": "",
         "CORE_API_KEY": "",
+        "WOS_API_KEY": "",
         "ACADEMIC_MCP_ENABLED_SOURCES": "arxiv,pubmed,pmc,biorxiv,medrxiv,semantic,core,crossref,google_scholar,iacr",
         "ACADEMIC_MCP_DISABLED_SOURCES": "ieee,scopus,springer,sciencedirect,wos,acm,jstor",
         "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
@@ -238,8 +246,8 @@ claude mcp test academic-mcp
   "context_servers": {
     "academic-mcp": {
       "command": {
-        "path": "python",
-        "args": ["-m", "academic_mcp"]
+        "path": "academic-mcp",
+        "args": []
       },
       "settings": {
         "env": {
@@ -249,6 +257,7 @@ claude mcp test academic-mcp
           "IEEE_API_KEY": "",
           "SCOPUS_API_KEY": "",
           "CORE_API_KEY": "",
+          "WOS_API_KEY": "",
           "ACADEMIC_MCP_ENABLED_SOURCES": "arxiv,pubmed,pmc,biorxiv,medrxiv,semantic,core,crossref,google_scholar,iacr",
           "ACADEMIC_MCP_DISABLED_SOURCES": "ieee,scopus,springer,sciencedirect,wos,acm,jstor",
           "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
@@ -268,6 +277,8 @@ claude mcp test academic-mcp
 
 **服务器命令：**
 ```bash
+academic-mcp
+# 或
 python -m academic_mcp
 ```
 
@@ -278,7 +289,10 @@ python -m academic_mcp
 - `IEEE_API_KEY`: IEEE Xplore 的可选 API 密钥
 - `SCOPUS_API_KEY`: Scopus 的可选 API 密钥
 - `CORE_API_KEY`: CORE 的可选 API 密钥
+- `WOS_API_KEY`: Web of Science 的可选 API 密钥
 - `ACADEMIC_MCP_DOWNLOAD_PATH`: 下载目录（默认：`./downloads`）
+- `ACADEMIC_MCP_ENABLED_SOURCES`: 逗号分隔的启用数据源列表
+- `ACADEMIC_MCP_DISABLED_SOURCES`: 逗号分隔的禁用数据源列表
 
 **服务器功能：**
 - 工具：`paper_search`、`paper_download`、`paper_read`

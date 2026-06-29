@@ -116,6 +116,7 @@ Choose your MCP client and follow the configuration steps:
         "IEEE_API_KEY": "",
         "SCOPUS_API_KEY": "",
         "CORE_API_KEY": "",
+        "WOS_API_KEY": "",
         "ACADEMIC_MCP_ENABLED_SOURCES": "arxiv,pubmed,pmc,biorxiv,medrxiv,semantic,core,crossref,google_scholar,iacr",
         "ACADEMIC_MCP_DISABLED_SOURCES": "ieee,scopus,springer,sciencedirect,wos,acm,jstor",
         "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
@@ -130,15 +131,17 @@ Choose your MCP client and follow the configuration steps:
 <details>
 <summary><b>2️⃣ Claude Code (CLI)</b></summary>
 
-**Location:** `~/.config/claude/config.json`
+**Location:**
+- User-level: `~/.claude/settings.json`
+- Project-level: `.mcp.json`
 
 **Configuration:**
 ```json
 {
   "mcpServers": {
     "academic-mcp": {
-      "command": "python",
-      "args": ["-m", "academic_mcp"],
+      "command": "academic-mcp",
+      "args": [],
       "env": {
         "SEMANTIC_SCHOLAR_API_KEY": "",
         "SCIENCEDIRECT_API_KEY": "",
@@ -146,6 +149,7 @@ Choose your MCP client and follow the configuration steps:
         "IEEE_API_KEY": "",
         "SCOPUS_API_KEY": "",
         "CORE_API_KEY": "",
+        "WOS_API_KEY": "",
         "ACADEMIC_MCP_ENABLED_SOURCES": "arxiv,pubmed,pmc,biorxiv,medrxiv,semantic,core,crossref,google_scholar,iacr",
         "ACADEMIC_MCP_DISABLED_SOURCES": "ieee,scopus,springer,sciencedirect,wos,acm,jstor",
         "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
@@ -154,6 +158,8 @@ Choose your MCP client and follow the configuration steps:
   }
 }
 ```
+
+> **Note:** You can also use `"command": "python"` with `"args": ["-m", "academic_mcp"]` if you prefer running via Python module.
 
 **Verify Installation:**
 ```bash
@@ -181,8 +187,8 @@ claude mcp test academic-mcp
 {
   "cline.mcpServers": {
     "academic-mcp": {
-      "command": "python",
-      "args": ["-m", "academic_mcp"],
+      "command": "academic-mcp",
+      "args": [],
       "env": {
         "SEMANTIC_SCHOLAR_API_KEY": "",
         "SCIENCEDIRECT_API_KEY": "",
@@ -190,6 +196,7 @@ claude mcp test academic-mcp
         "IEEE_API_KEY": "",
         "SCOPUS_API_KEY": "",
         "CORE_API_KEY": "",
+        "WOS_API_KEY": "",
         "ACADEMIC_MCP_ENABLED_SOURCES": "arxiv,pubmed,pmc,biorxiv,medrxiv,semantic,core,crossref,google_scholar,iacr",
         "ACADEMIC_MCP_DISABLED_SOURCES": "ieee,scopus,springer,sciencedirect,wos,acm,jstor",
         "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
@@ -207,8 +214,8 @@ Edit `~/.config/Code/User/settings.json` (Linux/macOS) or `%APPDATA%\Code\User\s
 {
   "cline.mcpServers": {
     "academic-mcp": {
-      "command": "python",
-      "args": ["-m", "academic_mcp"],
+      "command": "academic-mcp",
+      "args": [],
       "env": {
         "SEMANTIC_SCHOLAR_API_KEY": "",
         "SCIENCEDIRECT_API_KEY": "",
@@ -216,6 +223,7 @@ Edit `~/.config/Code/User/settings.json` (Linux/macOS) or `%APPDATA%\Code\User\s
         "IEEE_API_KEY": "",
         "SCOPUS_API_KEY": "",
         "CORE_API_KEY": "",
+        "WOS_API_KEY": "",
         "ACADEMIC_MCP_ENABLED_SOURCES": "arxiv,pubmed,pmc,biorxiv,medrxiv,semantic,core,crossref,google_scholar,iacr",
         "ACADEMIC_MCP_DISABLED_SOURCES": "ieee,scopus,springer,sciencedirect,wos,acm,jstor",
         "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
@@ -238,8 +246,8 @@ Edit `~/.config/Code/User/settings.json` (Linux/macOS) or `%APPDATA%\Code\User\s
   "context_servers": {
     "academic-mcp": {
       "command": {
-        "path": "python",
-        "args": ["-m", "academic_mcp"]
+        "path": "academic-mcp",
+        "args": []
       },
       "settings": {
         "env": {
@@ -249,6 +257,7 @@ Edit `~/.config/Code/User/settings.json` (Linux/macOS) or `%APPDATA%\Code\User\s
           "IEEE_API_KEY": "",
           "SCOPUS_API_KEY": "",
           "CORE_API_KEY": "",
+          "WOS_API_KEY": "",
           "ACADEMIC_MCP_ENABLED_SOURCES": "arxiv,pubmed,pmc,biorxiv,medrxiv,semantic,core,crossref,google_scholar,iacr",
           "ACADEMIC_MCP_DISABLED_SOURCES": "ieee,scopus,springer,sciencedirect,wos,acm,jstor",
           "ACADEMIC_MCP_DOWNLOAD_PATH": "./downloads"
@@ -268,6 +277,8 @@ For other MCP clients, use the standard MCP server configuration:
 
 **Server Command:**
 ```bash
+academic-mcp
+# or
 python -m academic_mcp
 ```
 
@@ -278,7 +289,10 @@ python -m academic_mcp
 - `IEEE_API_KEY`: Optional API key for IEEE Xplore
 - `SCOPUS_API_KEY`: Optional API key for Scopus
 - `CORE_API_KEY`: Optional API key for CORE
+- `WOS_API_KEY`: Optional API key for Web of Science
 - `ACADEMIC_MCP_DOWNLOAD_PATH`: Download directory (default: `./downloads`)
+- `ACADEMIC_MCP_ENABLED_SOURCES`: Comma-separated list of enabled sources
+- `ACADEMIC_MCP_DISABLED_SOURCES`: Comma-separated list of disabled sources
 
 **Server Capabilities:**
 - Tools: `paper_search`, `paper_download`, `paper_read`
