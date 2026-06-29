@@ -1,5 +1,6 @@
 import unittest
 import os
+import shutil
 import requests
 from academic_mcp.sources.medrxiv import MedRxivSearcher
 
@@ -40,8 +41,8 @@ class TestMedRxivSearcher(unittest.TestCase):
         if not papers:
             self.skipTest("No papers found for testing download")
 
-        save_path = "./downloads"
-        os.makedirs(save_path, exist_ok=True)
+        import tempfile
+        save_path = tempfile.mkdtemp(prefix="medrxiv_test_")
         paper = papers[0]
         pdf_path = None
 
@@ -51,11 +52,15 @@ class TestMedRxivSearcher(unittest.TestCase):
 
             text_content = self.searcher.read_paper(paper.paper_id, save_path)
             self.assertTrue(len(text_content) > 0)
+        except Exception as e:
+            if "403" in str(e) or "Forbidden" in str(e):
+                self.skipTest(f"medRxiv PDF download blocked (403): {e}")
+            raise
         finally:
             if pdf_path and os.path.exists(pdf_path):
                 os.remove(pdf_path)
             if os.path.exists(save_path):
-                os.rmdir(save_path)
+                shutil.rmtree(save_path, ignore_errors=True)
 
 if __name__ == '__main__':
     unittest.main()

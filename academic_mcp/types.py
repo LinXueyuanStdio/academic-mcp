@@ -63,34 +63,45 @@ class Paper:
 def paper2text(paper: Paper) -> str:
     """Convert Paper object to a text representation."""
     texts = []
-    if paper.source:
-        texts.append(f"Source: '{paper.source}'")
-    if paper.paper_id:
-        texts.append(f"Paper ID: '{paper.paper_id}'")
-    if paper.title:
-        texts.append(f"Title: {paper.title}")
-    if paper.authors:
-        texts.append(f"Authors: {'; '.join(paper.authors)}")
-    if paper.abstract:
-        texts.append(f"Abstract: {paper.abstract}")
-    if paper.published_date:
-        texts.append(f"Published Date: {paper.published_date.strftime('%Y-%m-%d')}")
-    if paper.url:
-        texts.append(f"URL: {paper.url}")
-    if paper.doi:
-        texts.append(f"DOI: {paper.doi}")
-    if paper.categories:
-        texts.append(f"Categories: {'; '.join(paper.categories)}")
-    if paper.keywords:
-        texts.append(f"Keywords: {'; '.join(paper.keywords)}")
-    if paper.citations:
-        texts.append(f"Citations: {paper.citations}")
-    if paper.references:
-        texts.append(f"References: {'; '.join(paper.references)}")
-    if paper.extra:
-        texts.append(f"Extra Info: {paper.extra}")
-    if not texts:
-        texts.append(str(paper.to_dict()))
+    try:
+        if paper.source:
+            texts.append(f"Source: '{paper.source}'")
+        if paper.paper_id:
+            texts.append(f"Paper ID: '{paper.paper_id}'")
+        if paper.title:
+            texts.append(f"Title: {paper.title}")
+        if paper.authors:
+            texts.append(f"Authors: {'; '.join(str(a) for a in paper.authors)}")
+        if paper.abstract:
+            texts.append(f"Abstract: {paper.abstract}")
+        if paper.published_date:
+            try:
+                texts.append(f"Published Date: {paper.published_date.strftime('%Y-%m-%d')}")
+            except (AttributeError, ValueError, TypeError):
+                texts.append(f"Published Date: {paper.published_date}")
+        if paper.url:
+            texts.append(f"URL: {paper.url}")
+        if paper.doi:
+            texts.append(f"DOI: {paper.doi}")
+        if paper.categories:
+            texts.append(f"Categories: {'; '.join(str(c) for c in paper.categories)}")
+        if paper.keywords:
+            texts.append(f"Keywords: {'; '.join(str(k) for k in paper.keywords)}")
+        if paper.citations:
+            texts.append(f"Citations: {paper.citations}")
+        if paper.references:
+            texts.append(f"References: {'; '.join(str(r) for r in paper.references)}")
+        if paper.extra:
+            texts.append(f"Extra Info: {paper.extra}")
+        if not texts:
+            texts.append(str(paper.to_dict()))
+    except Exception as e:
+        # Last-resort fallback: return whatever we can from to_dict
+        texts.append(f"[Error converting paper to text: {e}]")
+        try:
+            texts.append(str(paper.to_dict()))
+        except Exception:
+            texts.append(f"Paper(paper_id={paper.paper_id!r}, title={paper.title!r})")
     text = "\n".join(texts)
     return text
 

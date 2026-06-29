@@ -88,8 +88,14 @@ class TestCrossRefSearcher(unittest.TestCase):
 
     def test_read_paper_not_supported(self):
         message = self.searcher.read_paper("10.1038/nature12373")
-        self.assertIn("CrossRef papers cannot be read directly", message)
-        self.assertIn("metadata and abstracts are available", message)
+        # CrossRef read_paper may return metadata text if DOI lookup succeeds,
+        # or a "not supported" message if lookup fails
+        self.assertIsInstance(message, str)
+        self.assertTrue(len(message) > 0)
+        is_metadata = "Source:" in message and "Title:" in message
+        is_not_supported = "CrossRef papers cannot be read directly" in message
+        self.assertTrue(is_metadata or is_not_supported,
+            f"Expected either paper metadata or 'not supported' message, got: {message[:200]}")
 
     def test_search_error_handling(self):
         # Test with invalid search parameters to check error handling

@@ -192,23 +192,34 @@ def expand_query(query_list: list[PaperQuery]) -> list[PaperQuery]:
 async def async_search_per_query(query: PaperQuery) -> List[Paper]:
     searcher = engine2searcher.get(query.searcher)
     if not searcher:
+        logger.warning(f"Searcher '{query.searcher}' not found or disabled")
         return []
-    papers = []
-    if query.searcher == "iacr" and "iacr" in engine2searcher:
-        papers = searcher.search(query.query, query.max_results, query.fetch_details)
-    elif query.searcher == "semantic" and "semantic" in engine2searcher:
-        papers = searcher.search(query.query, query.year, query.max_results)
-    elif query.searcher == "crossref" and "crossref" in engine2searcher:
-        kwargs = query.kwargs if query.kwargs else {}
-        papers = searcher.search(query.query, query.max_results, **kwargs)
-    else:
-        papers = await async_search(searcher, query.query, query.max_results)
-    return papers
+    try:
+        papers = []
+        if query.searcher == "iacr" and "iacr" in engine2searcher:
+            papers = searcher.search(query.query, query.max_results, query.fetch_details)
+        elif query.searcher == "semantic" and "semantic" in engine2searcher:
+            papers = searcher.search(query.query, query.year, query.max_results)
+        elif query.searcher == "crossref" and "crossref" in engine2searcher:
+            kwargs = query.kwargs if query.kwargs else {}
+            papers = searcher.search(query.query, query.max_results, **kwargs)
+        else:
+            papers = await async_search(searcher, query.query, query.max_results)
+        return papers
+    except Exception as e:
+        logger.error(f"Error searching {query.searcher} for '{query.query}': {e}")
+        return []
 
 
 async def async_search_per_query_list(query_list: List[PaperQuery]) -> List[Paper]:
-    all_papers = await asyncio.gather(*[async_search_per_query(query) for query in query_list])
-    papers = sum(all_papers, [])
+    all_papers = await asyncio.gather(*[async_search_per_query(query) for query in query_list], return_exceptions=True)
+    papers = []
+    for result in all_papers:
+        if isinstance(result, Exception):
+            logger.error(f"Search query failed with exception: {result}")
+            continue
+        if isinstance(result, list):
+            papers.extend(result)
     return papers
 
 
@@ -236,16 +247,26 @@ paper_search([
 ])
 """,
 )
-async def paper_search(query_list: List[PaperQuery]) -> Dict[str, List[TextContent]]:
+async def paper_search(query_list: List[PaperQuery]) -> str:
     async with httpx.AsyncClient() as client:
-        expanded_queries = expand_query(query_list)
-        papers = await xmap_async(expanded_queries, async_search_per_query_list, is_async_work_func=True, desc="Searching papers", is_batch_work_func=True, batch_size=1)
+        try:
+            expanded_queries = expand_query(query_list)
+            papers = await xmap_async(expanded_queries, async_search_per_query_list, is_async_work_func=True, desc="Searching papers", is_batch_work_func=True, batch_size=1)
+        except Exception as e:
+            logger.error(f"Search failed: {e}\n{traceback.format_exc()}")
+            return f"Search failed due to an internal error: {e}"
         texts = []
         for paper in papers:
             if isinstance(paper, dict) and "error" in paper:
-                pass
-            else:
+                logger.warning(f"Skipping error result: {paper.get('error', 'unknown')}: {paper.get('message', '')}")
+                continue
+            if paper is None:
+                continue
+            try:
                 texts.append(paper2text(cast(Paper, paper)))
+            except Exception as e:
+                logger.warning(f"Error converting paper to text: {e}")
+                continue
         content = "\n\n".join(texts) if texts else "No papers found."
         return content
     content = "No papers found."
@@ -343,8 +364,14 @@ paper_download([
 )
 async def paper_download(query_list: List[PaperDownloadQuery]) -> List[str]:
     async with httpx.AsyncClient() as client:
-        pdf_paths = await xmap_async(query_list, async_download_per_query, is_async_work_func=True, desc="Downloading papers")
-        return pdf_paths
+        try:
+            pdf_paths = await xmap_async(query_list, async_download_per_query, is_async_work_func=True, desc="Downloading papers")
+            # Filter out error strings and None values
+            pdf_paths = [p for p in pdf_paths if p and isinstance(p, str)]
+            return pdf_paths
+        except Exception as e:
+            logger.error(f"Download failed: {e}\n{traceback.format_exc()}")
+            return [f"Download failed due to an internal error: {e}"]
     return []
 # endregion paper_download
 
